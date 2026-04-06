@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI News Diary</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f5f7;
+      color: #1d1d1f;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+    }
+
+    .auth-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .auth-bar .email {
+      color: #6e6e73;
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.4rem 0.9rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: #0071e3;
+      color: #fff;
+    }
+    .btn-primary:hover { background: #0077ed; }
+
+    .btn-secondary {
+      background: #e8e8ed;
+      color: #1d1d1f;
+    }
+    .btn-secondary:hover { background: #dcdce0; }
+
+    .btn-danger {
+      background: #e30000;
+      color: #fff;
+    }
+
+    .btn-subscribe {
+      background: #30d158;
+      color: #fff;
+    }
+    .btn-subscribe:hover { background: #28b84c; }
+
+    /* Auth form */
+    .auth-form {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .auth-form h2 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+    }
+
+    .auth-form input {
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #d2d2d7;
+      border-radius: 8px;
+      width: 100%;
+      margin-bottom: 0.75rem;
+    }
+
+    .auth-form .actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .auth-form .toggle {
+      font-size: 0.85rem;
+      color: #0071e3;
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin-left: auto;
+    }
+
+    .auth-form .error {
+      color: #e30000;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Subscription banner */
+    .sub-banner {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sub-banner p {
+      font-size: 0.9rem;
+      color: #6e6e73;
+    }
+
+    /* Entry form */
+    .entry-form {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .entry-form input[type="date"] {
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #d2d2d7;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      width: 100%;
+    }
+
+    .entry-form textarea {
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #d2d2d7;
+      border-radius: 8px;
+      width: 100%;
+      height: 100px;
+      resize: vertical;
+      margin-bottom: 0.75rem;
+    }
+
+    .entry-form button {
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      padding: 0.5rem 1.25rem;
+      background: #0071e3;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .entry-form button:hover { background: #0077ed; }
+
+    .entry-form .form-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .entry-form .char-count {
+      font-size: 0.8rem;
+      color: #86868b;
+    }
+
+    .entry-form .char-count.over {
+      color: #e30000;
+      font-weight: 600;
+    }
+
+    .entry-form .entry-error {
+      color: #e30000;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    .entries { list-style: none; }
+
+    .entry {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 0.75rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      position: relative;
+    }
+
+    .entry-date {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #6e6e73;
+      margin-bottom: 0.4rem;
+    }
+
+    .entry-text {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .entry .delete-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: #b0b0b5;
+      font-size: 1.1rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .entry .delete-btn:hover { color: #e30000; }
+
+    .empty {
+      text-align: center;
+      color: #86868b;
+      padding: 2rem 0;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>AI News Diary</h1>
+      <div class="auth-bar">
+        <!-- Logged out -->
+        <button class="btn btn-primary" id="showLoginBtn">Log in</button>
+        <!-- Logged in -->
+        <span class="email hidden" id="userEmail"></span>
+        <a class="btn btn-secondary hidden" id="adminLink" href="/admin">Admin</a>
+        <button class="btn btn-secondary hidden" id="logoutBtn">Log out</button>
+      </div>
+    </header>
+
+    <!-- Auth form (login / register) -->
+    <div class="auth-form hidden" id="authForm">
+      <h2 id="authTitle">Log in</h2>
+      <input type="email" id="authEmail" placeholder="Email" autocomplete="email">
+      <input type="password" id="authPassword" placeholder="Password" autocomplete="current-password">
+      <div class="actions">
+        <button class="btn btn-primary" id="authSubmit">Log in</button>
+        <button class="toggle" id="authToggle">Need an account? Register</button>
+      </div>
+      <div class="error hidden" id="authError"></div>
+    </div>
+
+    <!-- Subscription banner (logged in) -->
+    <div class="sub-banner hidden" id="subBanner">
+      <p id="subText">Subscribe to create and manage diary entries.</p>
+      <button class="btn btn-subscribe" id="subscribeBtn">Subscribe</button>
+    </div>
+
+    <!-- Entry form (subscribers only) -->
+    <form class="entry-form hidden" id="entryForm">
+      <input type="date" id="entryDate" required>
+      <textarea id="entryText" placeholder="What happened in AI today?" required maxlength="500"></textarea>
+      <div class="form-footer">
+        <button type="submit">Add Entry</button>
+        <span class="char-count" id="charCount">0 / 500</span>
+      </div>
+      <div class="entry-error hidden" id="entryError"></div>
+    </form>
+
+    <ul class="entries" id="entries"></ul>
+  </div>
+
+  <script>
+    // ── State ──────────────────────────────────────────────────────────
+    let token = localStorage.getItem('token');
+    let currentUser = null;
+    let isLoginMode = true;
+
+    // ── DOM refs ──────────────────────────────────────────────────────
+    const showLoginBtn = document.getElementById('showLoginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userEmailSpan = document.getElementById('userEmail');
+    const authForm = document.getElementById('authForm');
+    const authTitle = document.getElementById('authTitle');
+    const authEmail = document.getElementById('authEmail');
+    const authPassword = document.getElementById('authPassword');
+    const authSubmit = document.getElementById('authSubmit');
+    const authToggle = document.getElementById('authToggle');
+    const authError = document.getElementById('authError');
+    const subBanner = document.getElementById('subBanner');
+    const subscribeBtn = document.getElementById('subscribeBtn');
+    const entryForm = document.getElementById('entryForm');
+    const dateInput = document.getElementById('entryDate');
+    const textInput = document.getElementById('entryText');
+    const entriesList = document.getElementById('entries');
+    const charCount = document.getElementById('charCount');
+    const entryError = document.getElementById('entryError');
+
+    dateInput.valueAsDate = new Date();
+
+    // ── Character counter ─────────────────────────────────────────────
+    textInput.addEventListener('input', () => {
+      const len = textInput.value.length;
+      charCount.textContent = len + ' / 500';
+      charCount.classList.toggle('over', len > 500);
+    });
+
+    // ── Helpers ───────────────────────────────────────────────────────
+    function authHeaders() {
+      return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : {};
+    }
+
+    function formatDate(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('en-US', {
+        weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
+        timeZone: 'Asia/Seoul'
+      });
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function showError(msg) {
+      authError.textContent = msg;
+      authError.classList.remove('hidden');
+    }
+
+    // ── UI update ─────────────────────────────────────────────────────
+    function updateUI() {
+      const loggedIn = !!currentUser;
+      const subscribed = loggedIn && currentUser.subscribed;
+
+      showLoginBtn.classList.toggle('hidden', loggedIn);
+      userEmailSpan.classList.toggle('hidden', !loggedIn);
+      document.getElementById('adminLink').classList.toggle('hidden', !(loggedIn && currentUser.is_admin));
+      logoutBtn.classList.toggle('hidden', !loggedIn);
+      subBanner.classList.toggle('hidden', !loggedIn);
+      entryForm.classList.toggle('hidden', !subscribed);
+
+      if (subscribed) {
+        document.getElementById('subText').textContent = 'You are subscribed!';
+        subscribeBtn.classList.add('hidden');
+      } else {
+        document.getElementById('subText').textContent = 'Subscribe to create and manage diary entries.';
+        subscribeBtn.classList.remove('hidden');
+      }
+
+      if (loggedIn) {
+        userEmailSpan.textContent = currentUser.email;
+        authForm.classList.add('hidden');
+      }
+    }
+
+    // ── Auth ──────────────────────────────────────────────────────────
+    showLoginBtn.addEventListener('click', () => {
+      authForm.classList.toggle('hidden');
+      authError.classList.add('hidden');
+    });
+
+    authToggle.addEventListener('click', () => {
+      isLoginMode = !isLoginMode;
+      authTitle.textContent = isLoginMode ? 'Log in' : 'Register';
+      authSubmit.textContent = isLoginMode ? 'Log in' : 'Register';
+      authToggle.textContent = isLoginMode ? 'Need an account? Register' : 'Already have an account? Log in';
+      authError.classList.add('hidden');
+    });
+
+    authSubmit.addEventListener('click', async () => {
+      authError.classList.add('hidden');
+      const email = authEmail.value.trim();
+      const password = authPassword.value;
+      if (!email || !password) return showError('Email and password required');
+
+      const endpoint = isLoginMode ? '/api/login' : '/api/register';
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) return showError(data.error);
+
+        token = data.token;
+        localStorage.setItem('token', token);
+        currentUser = data.user;
+        authPassword.value = '';
+        updateUI();
+        renderEntries();
+      } catch {
+        showError('Network error');
+      }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      token = null;
+      currentUser = null;
+      localStorage.removeItem('token');
+      updateUI();
+      renderEntries();
+    });
+
+    // ── Stripe subscription ──────────────────────────────────────────
+    subscribeBtn.addEventListener('click', async () => {
+      try {
+        const res = await fetch('/api/stripe/checkout', {
+          method: 'POST',
+          headers: authHeaders(),
+        });
+        const data = await res.json();
+        if (data.url) window.location.href = data.url;
+      } catch (err) {
+        alert('Failed to start checkout');
+      }
+    });
+
+    // ── Entries ───────────────────────────────────────────────────────
+    async function renderEntries() {
+      try {
+        const res = await fetch('/api/entries', token ? { headers: authHeaders() } : {});
+        const entries = await res.json();
+        const isSubscribed = currentUser && currentUser.subscribed;
+        const isAdmin = currentUser && currentUser.is_admin;
+        if (entries.length === 0) {
+          entriesList.innerHTML = '<li class="empty">No entries yet.</li>';
+          return;
+        }
+        entriesList.innerHTML = entries.map(e => {
+          const isOwner = currentUser && e.user_id != null && String(e.user_id) === String(currentUser.id);
+          const canDelete = isAdmin || isOwner;
+          return `
+          <li class="entry">
+            ${canDelete ? `<button class="delete-btn" data-id="${e.id}" title="Delete">&times;</button>` : ''}
+            <div class="entry-date">${formatDate(e.date)}</div>
+            <div class="entry-text">${escapeHtml(e.text)}</div>
+          </li>
+        `}).join('');
+      } catch {
+        entriesList.innerHTML = '<li class="empty">Failed to load entries.</li>';
+      }
+    }
+
+    entryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      entryError.classList.add('hidden');
+      const res = await fetch('/api/entries', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ date: dateInput.value, text: textInput.value }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        entryError.textContent = data.error;
+        entryError.classList.remove('hidden');
+        return;
+      }
+      textInput.value = '';
+      charCount.textContent = '0 / 500';
+      charCount.classList.remove('over');
+      entryError.classList.add('hidden');
+      renderEntries();
+    });
+
+    entriesList.addEventListener('click', async (e) => {
+      if (e.target.classList.contains('delete-btn')) {
+        await fetch(`/api/entries/${e.target.dataset.id}`, {
+          method: 'DELETE',
+          headers: authHeaders(),
+        });
+        renderEntries();
+      }
+    });
+
+    // ── Init ─────────────────────────────────────────────────────────
+    function setUser(data) {
+      currentUser = data.user;
+      token = data.token;
+      localStorage.setItem('token', token);
+    }
+
+    function clearUser() {
+      token = null;
+      currentUser = null;
+      localStorage.removeItem('token');
+    }
+
+    async function init() {
+      if (!token) { updateUI(); renderEntries(); return; }
+
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get('session_id');
+
+      if (sessionId) {
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+
+      // Step 1: Always refresh user from DB first (keeps session alive)
+      try {
+        const meRes = await fetch('/api/me', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (meRes.ok) {
+          setUser(await meRes.json());
+        } else {
+          clearUser();
+          updateUI();
+          renderEntries();
+          return;
+        }
+      } catch {
+        // Network error — keep existing token, don't log out
+      }
+
+      // Step 2: If returning from Stripe, verify the session to activate subscription
+      if (sessionId && token) {
+        try {
+          const verifyRes = await fetch('/api/stripe/verify-session', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_id: sessionId }),
+          });
+          if (verifyRes.ok) {
+            setUser(await verifyRes.json());
+          }
+        } catch {
+          // Verification failed — user stays logged in, just not subscribed yet
+        }
+      }
+
+      updateUI();
+      renderEntries();
+    }
+
+    init();
+  </script>
+</body>
+</html>
